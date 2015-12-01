@@ -1,4 +1,4 @@
-package tutorials.oskarveerhoek.ch04;
+package codes.oskarveerhoek.episode04;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;

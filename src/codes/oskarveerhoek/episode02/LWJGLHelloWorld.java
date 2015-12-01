@@ -1,4 +1,4 @@
-package tutorials.oskarveerhoek.ch02;
+package codes.oskarveerhoek.episode02;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
