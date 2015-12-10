@@ -1,7 +1,6 @@
 package codes.oskarveerhoek.episode11;
 
 import org.lwjgl.LWJGLException;
-import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -15,6 +14,10 @@ public class Boot {
 
     private BlockGrid grid;
     private BlockType selection = BlockType.STONE;
+
+    private int selectorX = 0, selectorY = 0;
+
+    private boolean mouseEnabled = true;
 
     public Boot() {
         try {
@@ -32,12 +35,11 @@ public class Boot {
         glMatrixMode(GL_MODELVIEW);
 
         glEnable(GL_TEXTURE_2D);
+        glEnable(GL_BLEND);
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         grid = new BlockGrid();
-
-        grid.setAt(10, 10, BlockType.STONE);
-
-
 
         while (!Display.isCloseRequested()) {
 
@@ -47,6 +49,7 @@ public class Boot {
 
             input();
             grid.draw();
+            drawSelectionBox();
 
             Display.update();
             Display.sync(60);
@@ -55,18 +58,76 @@ public class Boot {
         Display.destroy();
     }
 
+    private void drawSelectionBox() {
+
+        int x = selectorX * World.BLOCK_SIZE;
+        int y = selectorY * World.BLOCK_SIZE;
+        int x2 = x + World.BLOCK_SIZE;
+        int y2 = y + World.BLOCK_SIZE;
+
+        if (grid.getAt(selectorX, selectorY).getType() != BlockType.AIR || selection == BlockType.AIR) {
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glColor4f(1f, 1f, 1f, 0.5f);
+            glBegin(GL_QUADS);
+            glVertex2i(x, y);
+            glVertex2i(x2, y);
+            glVertex2i(x2, y2);
+            glVertex2i(x, y2);
+            glEnd();
+            glColor4f(1f, 1f, 1f, 1f);
+        } else {
+            glColor4f(1f, 1f, 1f, 0.5f);
+            new Block(selection, selectorX * World.BLOCK_SIZE, selectorY * World.BLOCK_SIZE).draw();
+            glColor4f(1f, 1f, 1f, 1f);
+        }
+    }
+
     private void input() {
-        int mouseX = Mouse.getX();
-        int mouseY = 480 - Mouse.getY() - 1;
-        boolean mouseClicked = Mouse.isButtonDown(0);
-        if (mouseClicked) {
-            int grid_x = Math.round(mouseX / World.BLOCK_SIZE);
-            int grid_y = Math.round(mouseY / World.BLOCK_SIZE);
-            grid.setAt(grid_x, grid_y, selection);
+        if (mouseEnabled || Mouse.isButtonDown(0)) {
+            mouseEnabled = true;
+            int mouseX = Mouse.getX();
+            int mouseY = 480 - Mouse.getY() - 1;
+            boolean mouseClicked = Mouse.isButtonDown(0);
+
+            selectorX = Math.round(mouseX / World.BLOCK_SIZE);
+            selectorY = Math.round(mouseY / World.BLOCK_SIZE);
+            if (mouseClicked) {
+                grid.setAt(selectorX, selectorY, selection);
+            }
         }
 
 
         while (Keyboard.next()) {
+
+            if (Keyboard.getEventKey() == Keyboard.KEY_RIGHT && Keyboard.getEventKeyState()) {
+                mouseEnabled = false;
+                if (!(selectorX + 1 > World.BLOCKS_WIDTH - 2)) {
+                    selectorX++;
+                }
+            }
+
+            if (Keyboard.getEventKey() == Keyboard.KEY_LEFT && Keyboard.getEventKeyState()) {
+                mouseEnabled = false;
+                if (!(selectorX - 1 < 0)) {
+                    selectorX--;
+                }
+            }
+
+            if (Keyboard.getEventKey() == Keyboard.KEY_DOWN && Keyboard.getEventKeyState()) {
+                mouseEnabled = false;
+                if (!(selectorY + 1 > World.BLOCKS_WIDTH - 2)) {
+                    selectorY++;
+                }
+            }
+
+
+            if (Keyboard.getEventKey() == Keyboard.KEY_UP && Keyboard.getEventKeyState()) {
+                mouseEnabled = false;
+                if (!(selectorY - 1 < 0)) {
+                    selectorY--;
+                }
+            }
+
             if (Keyboard.getEventKey() == Keyboard.KEY_S) {
                 grid.save(new File("save.xml"));
             }

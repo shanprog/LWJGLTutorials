@@ -72,4 +72,8 @@ public class Block {
     public void setY(float y) {
         this.y = y;
     }
+
+    public void bind() {
+        texture.bind();
+    }
 }
