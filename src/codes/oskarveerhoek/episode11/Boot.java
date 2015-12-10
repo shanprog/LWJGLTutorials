@@ -1,9 +1,12 @@
 package codes.oskarveerhoek.episode11;
 
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+
+import java.io.File;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -59,6 +62,16 @@ public class Boot {
             grid.setAt(grid_x, grid_y, BlockType.STONE);
         }
 
+
+        while (Keyboard.next()) {
+            if (Keyboard.getEventKey() == Keyboard.KEY_S) {
+                grid.save(new File("save.xml"));
+            }
+
+            if (Keyboard.getEventKey() == Keyboard.KEY_L) {
+                grid.load(new File("save.xml"));
+            }
+        }
     }
 
     public static void main(String[] args) {
